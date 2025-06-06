@@ -2,6 +2,7 @@
 ## Package Code
 ### MultiFaceLandmarkListAnnoation.cs
 -> Face Mark를 받아서 View에 표시해줌
+-> Face, Iris LandmarkListAnnotation 코드가 있는 프리팹을 소환함
 
 ### VisionTaskAPI
 -> 실질적으로 처리하는 놈인듯?
@@ -12,6 +13,13 @@
 
 ### FaceLandmarkResult
 -> 결과를 주는 친구
+
+### ListAnotation
+
+### IrisLandmarkListAnnotation
+### FaceLandmarkListAnnotation
+-> 이 두 개 안에서 입 index, 눈 index 같은거 보고 처리해야함.
+얼굴의 중심좌표는?
 
 ## Sample codes
 ### FaceLandmarkRunner.cs
