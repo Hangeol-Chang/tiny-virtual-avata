@@ -39,8 +39,8 @@ namespace Mediapipe.Unity.Sample
     [SerializeField] private TextAsset _openGlEsConfig = null;
     [SerializeField] private long _timeoutMicrosec = 0;
 
-    private static readonly GlobalInstanceTable<int, GraphRunner> _InstanceTable = new GlobalInstanceTable<int, GraphRunner>(5);
-    private static readonly Dictionary<IntPtr, int> _NameTable = new Dictionary<IntPtr, int>();
+    private static readonly GlobalInstanceTable<EntityId, GraphRunner> _InstanceTable = new GlobalInstanceTable<EntityId, GraphRunner>(5);
+    private static readonly Dictionary<IntPtr, EntityId> _NameTable = new Dictionary<IntPtr, EntityId>();
 
     protected RunningMode runningMode { get; private set; } = RunningMode.Async;
     private bool _isRunning = false;
@@ -100,7 +100,7 @@ namespace Mediapipe.Unity.Sample
 
     protected virtual void Start()
     {
-      _InstanceTable.Add(GetInstanceID(), this);
+      _InstanceTable.Add(GetEntityId(), this);
     }
 
     protected virtual void OnDestroy()
@@ -372,7 +372,7 @@ namespace Mediapipe.Unity.Sample
     protected void InitializeCalculatorGraph()
     {
       calculatorGraph = new CalculatorGraph();
-      _NameTable.Add(calculatorGraph.mpPtr, GetInstanceID());
+      _NameTable.Add(calculatorGraph.mpPtr, GetEntityId());
 
       // NOTE: There's a simpler way to initialize CalculatorGraph.
       //
