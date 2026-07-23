@@ -20,6 +20,21 @@ namespace Mediapipe.Unity.Sample.FaceDetection
     public RotationAngle rotationAngle { get; set; } = RotationAngle.Rotation0;
     public Vector2Int imageSize { get; set; }
 
+    public const float MinScale = 0.1f;
+    public const float MaxScale = 5f;
+
+    private float _scale = 1f;
+    /// <summary>Uniform scale applied to the avatar visual. 1 = the sizeDelta baked into the RectTransform.</summary>
+    public float Scale
+    {
+      get => _scale;
+      set
+      {
+        _scale = Mathf.Clamp(value, MinScale, MaxScale);
+        ApplyScale();
+      }
+    }
+
     private readonly object _targetLock = new object();
     private FaceDetectionResult _currentTarget;
     private bool _isStale;
@@ -32,6 +47,15 @@ namespace Mediapipe.Unity.Sample.FaceDetection
       if (_avatarRectTransform == null)
       {
         _avatarRectTransform = GetComponent<RectTransform>();
+      }
+      ApplyScale();
+    }
+
+    private void ApplyScale()
+    {
+      if (_avatarRectTransform != null)
+      {
+        _avatarRectTransform.localScale = Vector3.one * _scale;
       }
     }
 
@@ -118,8 +142,28 @@ namespace Mediapipe.Unity.Sample.FaceDetection
       var centerY = (box.top + box.bottom) / 2f;
 
       var localPoint = ImageCoordinate.ImageToPoint(_screenRectTransform.rect, (int)centerX, (int)centerY, imageSize.x, imageSize.y, rotationAngle, isMirrored);
-      _targetPosition = localPoint;
+      _targetPosition = ClampToScreen(localPoint);
       _hasValidPosition = true;
+    }
+
+    /// <summary>Keeps the avatar's pivot far enough inside the screen rect that its bounds never cross the edge.</summary>
+    private Vector2 ClampToScreen(Vector2 point)
+    {
+      var screenRect = _screenRectTransform.rect;
+      var avatarRect = _avatarRectTransform.rect;
+      var halfWidth = avatarRect.width * _avatarRectTransform.localScale.x * 0.5f;
+      var halfHeight = avatarRect.height * _avatarRectTransform.localScale.y * 0.5f;
+
+      var minX = screenRect.xMin + halfWidth;
+      var maxX = screenRect.xMax - halfWidth;
+      var minY = screenRect.yMin + halfHeight;
+      var maxY = screenRect.yMax - halfHeight;
+
+      // Screen smaller than the avatar: fall back to centering on that axis instead of an inverted clamp.
+      var x = minX <= maxX ? Mathf.Clamp(point.x, minX, maxX) : screenRect.center.x;
+      var y = minY <= maxY ? Mathf.Clamp(point.y, minY, maxY) : screenRect.center.y;
+
+      return new Vector2(x, y);
     }
   }
 }
